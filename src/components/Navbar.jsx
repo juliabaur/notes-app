@@ -1,32 +1,23 @@
-import React from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    signOut(); // sign in user
-    navigate('/signin'); // directing to sign in page
-  };
+  const { user, logout } = useAuth();
 
   return (
-    <nav>
-      <ul>
-        <li><a href="/">Home</a></li>
-        {user ? (
-          <>
-            <li><a href="/notes">Notes</a></li>
-            <li><button onClick={handleLogout}>Logout</button></li>
-          </>
-        ) : (
-          <>
-            <li><a href="/signin">Sign In</a></li>
-            <li><a href="/register">Register</a></li>
-          </>
-        )}
-      </ul>
+    <nav className="flex gap-12 items-center">
+      <Link to="/" className="hover:text-gray-400">Home</Link>
+      {user ? (
+        <>
+          <Link to="/notes" className="hover:text-gray-400">Notes</Link>
+          <button onClick={logout} className="hover:text-gray-400">Sign Out</button>
+        </>
+      ) : (
+        <>
+          <Link to="/signin" className="hover:text-gray-400">Sign In</Link>
+          <Link to="/register" className="hover:text-gray-400">Register</Link>
+        </>
+      )}
     </nav>
   );
 };

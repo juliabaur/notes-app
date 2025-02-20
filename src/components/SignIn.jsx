@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext'; // Correct import of AuthContext
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const SignIn = () => {
-  const { login } = useAuth(); // Ensure you're using login here
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSignIn = (e) => {
     e.preventDefault();
-    login(email, password); // Call the login function
-    navigate('/notes'); // Redirect to the notes page after successful sign-in
+    
+    login(email, password);
+
+    // After login, check if user exists before navigating
+    const loggedInUser = JSON.parse(localStorage.getItem('user'));
+    if (loggedInUser) {
+      navigate('/notes'); 
+    } else {
+      console.log("Login failed. Invalid credentials.");
+    }
   };
 
   return (
@@ -23,12 +31,14 @@ const SignIn = () => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
         <button type="submit">Sign In</button>
       </form>

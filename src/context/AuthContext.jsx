@@ -10,28 +10,38 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    if (storedUser) {
-      setUser(storedUser);
+    const savedUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (savedUser) {
+      setUser(savedUser);
     }
   }, []);
 
   const register = (email, password) => {
-    // Your registration logic
-    const newUser = { email }; // Simplified for now
-    localStorage.setItem('user', JSON.stringify(newUser));
-    setUser(newUser);
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    if (users.some(user => user.email === email)) {
+      console.log("User already exists.");
+      return;
+    }
+
+    const newUser = { email, password };
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
   };
 
   const login = (email, password) => {
-    // Your login logic
-    const loggedInUser = { email }; // Simplified for now
-    localStorage.setItem('user', JSON.stringify(loggedInUser));
-    setUser(loggedInUser);
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const userExists = users.find(user => user.email === email && user.password === password);
+
+    if (userExists) {
+      localStorage.setItem('currentUser', JSON.stringify(userExists));
+      setUser(userExists);
+    } else {
+      console.log("Invalid credentials");
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem('currentUser');
     setUser(null);
   };
 

@@ -69,3 +69,4 @@ export const useNotes = () => {
   return context;
 };
 
+export default NotesContext;

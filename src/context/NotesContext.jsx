@@ -1,57 +1,25 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useReducer, useContext } from 'react';
 
-// Initial state of note
-const initialState = {
-    notes: [],
-  };
-  
-  // Actions for reducer
-  export const ACTIONS = {  
-    ADD_NOTE: 'add_note',
-    DELETE_NOTE: 'delete_note',
-    UPDATE_NOTE: 'update_note',
-  };
-  
+export const ACTIONS = {
+  ADD_NOTE: 'ADD_NOTE',
+  DELETE_NOTE: 'DELETE_NOTE',
+};
 
-// Reducer function
+const NotesContext = createContext();
+
 const notesReducer = (state, action) => {
   switch (action.type) {
     case ACTIONS.ADD_NOTE:
       return { ...state, notes: [...state.notes, action.payload] };
     case ACTIONS.DELETE_NOTE:
-      return { ...state, notes: state.notes.filter((note) => note.id !== action.payload) };
-    case ACTIONS.UPDATE_NOTE:
-      return {
-        ...state,
-        notes: state.notes.map((note) =>
-          note.id === action.payload.id ? { ...note, ...action.payload } : note
-        ),
-      };
+      return { ...state, notes: state.notes.filter(note => note.id !== action.payload) };
     default:
       return state;
   }
 };
 
-// Create context
-const NotesContext = createContext();
-
-// Context provider component
 export const NotesProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(notesReducer, initialState, (initial) => {
-    // Load notes from Localstorage if existing
-    const storedNotes = localStorage.getItem('notes');
-    if (storedNotes) {
-      return { notes: JSON.parse(storedNotes) };
-    }
-    return initial;
-  });
-
-  // Store notes in local storage if state is changed
-  useEffect(() => {
-    if (state.notes.length > 0) {
-      localStorage.setItem('notes', JSON.stringify(state.notes));
-    }
-  }, [state.notes]);
+  const [state, dispatch] = useReducer(notesReducer, { notes: [] });
 
   return (
     <NotesContext.Provider value={{ state, dispatch }}>
@@ -60,7 +28,6 @@ export const NotesProvider = ({ children }) => {
   );
 };
 
-// Hook to call context
 export const useNotes = () => {
   const context = useContext(NotesContext);
   if (!context) {
@@ -68,5 +35,3 @@ export const useNotes = () => {
   }
   return context;
 };
-
-export default NotesContext;

@@ -14,20 +14,28 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const signIn = (userData) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData)); // Save User in Local Storage
+  // Register Function (Correct Placement)
+  const register = (email, password) => {
+    const newUser = { email, password };
+    localStorage.setItem('user', JSON.stringify(newUser)); 
+    setUser(newUser);
+  };
+
+  // Sign-in Function (Fixing Validation)
+  const signIn = (email, password) => {
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+
+    if (storedUser && storedUser.email === email && storedUser.password === password) {
+      setUser(storedUser);
+      return true; // Sign-in successful
+    } else {
+      return false; // Invalid credentials
+    }
   };
 
   const signOut = () => {
     setUser(null);
     localStorage.removeItem('user'); // Remove User from Local Storage
-  };
-
-  const register = (email, password) => {
-    const newUser = { email, password };
-    setUser(newUser); // Set user state
-    localStorage.setItem('user', JSON.stringify(newUser)); // Save user in local storage
   };
 
   return (
@@ -45,5 +53,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-export default AuthContext;

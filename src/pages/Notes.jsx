@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const Notes = () => {
   const { user } = useAuth(); // Access current user
 
+  // Redirect if user is not logged in
   if (!user) {
     return <div className="text-center text-red-500 mt-10">You need to sign in to access the notes.</div>;
   }
@@ -14,13 +15,10 @@ const Notes = () => {
   const { state, dispatch } = useNotes();
   const [note, setNote] = useState('');
 
-  // Filter notes by logged-in user
-  const userNotes = state.notes.filter(note => note.userEmail === user.email);
-
   // Add new note
   const handleAddNote = () => {
     if (note.trim() === '') return; // Prevent empty notes
-    const newNote = { id: Date.now(), content: note, userEmail: user.email }; // Store email with note
+    const newNote = { id: Date.now(), content: note };
     dispatch({ type: ACTIONS.ADD_NOTE, payload: newNote });
     setNote('');
   };
@@ -39,7 +37,7 @@ const Notes = () => {
           type="text"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="New Note"
+          placeholder="Neue Notiz"
           className="border p-2 w-full rounded-md"
         />
         <button
@@ -51,10 +49,10 @@ const Notes = () => {
       </div>
 
       <ul className="mt-4">
-        {userNotes.length === 0 ? (
+        {state.notes.length === 0 ? (
           <p className="text-gray-500 text-center">No notes yet.</p>
         ) : (
-          userNotes.map((note) => (
+          state.notes.map((note) => (
             <li key={note.id} className="flex justify-between items-center border-b py-2">
               <span>{note.content}</span>
               <button

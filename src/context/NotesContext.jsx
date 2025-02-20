@@ -1,45 +1,37 @@
-import React, { useReducer, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-
-export const NotesContext = React.createContext();
+import React, { createContext, useReducer, useContext } from 'react';
 
 export const ACTIONS = {
-  ADD_NOTE: 'add_note',
-  DELETE_NOTE: 'delete_note',
+  ADD_NOTE: 'ADD_NOTE',
+  DELETE_NOTE: 'DELETE_NOTE',
 };
+
+const NotesContext = createContext();
 
 const notesReducer = (state, action) => {
   switch (action.type) {
     case ACTIONS.ADD_NOTE:
-      const updatedNotes = [...state.notes, action.payload];
-      localStorage.setItem('notes', JSON.stringify(updatedNotes));
-      return { ...state, notes: updatedNotes };
-
+      return { ...state, notes: [...state.notes, action.payload] };
     case ACTIONS.DELETE_NOTE:
-      const filteredNotes = state.notes.filter(note => note.id !== action.payload);
-      localStorage.setItem('notes', JSON.stringify(filteredNotes));
-      return { ...state, notes: filteredNotes };
-
+      return { ...state, notes: state.notes.filter(note => note.id !== action.payload) };
     default:
       return state;
   }
 };
 
 export const NotesProvider = ({ children }) => {
-  const { user } = useAuth();
   const [state, dispatch] = useReducer(notesReducer, { notes: [] });
-
-  useEffect(() => {
-    if (user) {
-      const storedNotes = JSON.parse(localStorage.getItem('notes')) || [];
-      const userNotes = storedNotes.filter(note => note.userEmail === user.email);
-      dispatch({ type: 'load_notes', payload: userNotes });
-    }
-  }, [user]);
 
   return (
     <NotesContext.Provider value={{ state, dispatch }}>
       {children}
     </NotesContext.Provider>
   );
+};
+
+export const useNotes = () => {
+  const context = useContext(NotesContext);
+  if (!context) {
+    throw new Error('useNotes must be used within a NotesProvider');
+  }
+  return context;
 };

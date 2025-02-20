@@ -3,7 +3,13 @@ import { useAuth } from '../context/AuthContext';
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
-  return user ? children : <Navigate to="/signin" />;
+
+  if (!user) {
+    // If user is not logged in, redirect to sign in page
+    return <Navigate to="/signin" />;
+  }
+
+  return children; // Return children if user is authenticated
 };
 
 export default PrivateRoute;

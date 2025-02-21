@@ -8,12 +8,10 @@ const Home = () => {
     <div>
       <h2>
         {user 
-          ? user.username 
-            ? `Welcome to your Notes, ${user.username}!` 
-            : 'Welcome to the Notes App!'
+          ? `Welcome${user.username ? ` to your Notes, ${user.username}` : ''}!`
           : 'Welcome to the Notes App!'}
       </h2>
-      {/* Display the appropriate welcome message based on user login and username availability */}
+      {/* If the user is logged in, we greet them with their username if available */}
     </div>
   );
 };

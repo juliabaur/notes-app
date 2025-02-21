@@ -1,14 +1,18 @@
-import React, { createContext, useReducer, useContext } from 'react';
+import React, { createContext, useReducer, useContext, useEffect } from 'react';
+import { useAuth } from './AuthContext'; // Import AuthContext for user access
 
 export const ACTIONS = {
   ADD_NOTE: 'ADD_NOTE',
   DELETE_NOTE: 'DELETE_NOTE',
+  LOAD_NOTES: 'LOAD_NOTES',
 };
 
 const NotesContext = createContext();
 
 const notesReducer = (state, action) => {
   switch (action.type) {
+    case ACTIONS.LOAD_NOTES:
+      return { ...state, notes: action.payload };
     case ACTIONS.ADD_NOTE:
       return { ...state, notes: [...state.notes, action.payload] };
     case ACTIONS.DELETE_NOTE:
@@ -19,10 +23,52 @@ const notesReducer = (state, action) => {
 };
 
 export const NotesProvider = ({ children }) => {
+  const { user } = useAuth(); // Get the currently logged-in user
   const [state, dispatch] = useReducer(notesReducer, { notes: [] });
 
+  // ✅ Load notes when user changes
+  useEffect(() => {
+    if (user) {
+      const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
+      const userNotes = allNotes[user.email] || [];
+      dispatch({ type: ACTIONS.LOAD_NOTES, payload: userNotes });
+    } else {
+      dispatch({ type: ACTIONS.LOAD_NOTES, payload: [] });
+    }
+  }, [user]);
+
+  // ✅ Save note under the logged-in user
+  const saveNote = (note) => {
+    if (!user) {
+      throw new Error("No user logged in");
+    }
+
+    const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
+    const userNotes = allNotes[user.email] || [];
+
+    const updatedNotes = [...userNotes, note];
+    allNotes[user.email] = updatedNotes;
+    localStorage.setItem("notes", JSON.stringify(allNotes));
+
+    dispatch({ type: ACTIONS.ADD_NOTE, payload: note });
+  };
+
+  // ✅ Delete a specific note
+  const deleteNote = (id) => {
+    if (!user) return;
+
+    const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
+    const userNotes = allNotes[user.email] || [];
+
+    const updatedNotes = userNotes.filter(note => note.id !== id);
+    allNotes[user.email] = updatedNotes;
+    localStorage.setItem("notes", JSON.stringify(allNotes));
+
+    dispatch({ type: ACTIONS.DELETE_NOTE, payload: id });
+  };
+
   return (
-    <NotesContext.Provider value={{ state, dispatch }}>
+    <NotesContext.Provider value={{ notes: state.notes, saveNote, deleteNote }}>
       {children}
     </NotesContext.Provider>
   );

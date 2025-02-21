@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNotes } from '../context/NotesContext';
-import { ACTIONS } from '../context/NotesContext';
 import { useAuth } from '../context/AuthContext';
 
 const Notes = () => {
@@ -12,20 +11,20 @@ const Notes = () => {
   }
 
   // Access notes from context
-  const { state, dispatch } = useNotes();
+  const { notes, saveNote, deleteNote } = useNotes();
   const [note, setNote] = useState('');
 
   // Add new note
   const handleAddNote = () => {
     if (note.trim() === '') return; // Prevent empty notes
     const newNote = { id: Date.now(), content: note };
-    dispatch({ type: ACTIONS.ADD_NOTE, payload: newNote });
+    saveNote(newNote); // Now using the context function
     setNote('');
   };
 
   // Delete Note
   const handleDeleteNote = (id) => {
-    dispatch({ type: ACTIONS.DELETE_NOTE, payload: id });
+    deleteNote(id); // Now using the context function
   };
 
   return (
@@ -49,10 +48,10 @@ const Notes = () => {
       </div>
 
       <ul className="mt-4">
-        {state.notes.length === 0 ? (
+        {notes.length === 0 ? (
           <p className="text-gray-500 text-center">No notes yet.</p>
         ) : (
-          state.notes.map((note) => (
+          notes.map((note) => (
             <li key={note.id} className="flex justify-between items-center border-b py-2">
               <span>{note.content}</span>
               <button

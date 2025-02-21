@@ -90,7 +90,7 @@ const Notes = () => {
                       onClick={() => handleEdit(note)}
                       className="bg-blue-500 text-white px-3 py-1 rounded-md"
                     >
-                      Edit
+                      Edit 
                     </button>
                     <button
                       onClick={() => deleteNote(note.id)}

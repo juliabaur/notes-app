@@ -27,11 +27,16 @@ const EditNote = () => {
   }, [note, navigate]);
 
   const handleSave = () => {
-    if (!note) return;
-
-    updateNote({ ...note, title, content });  // Ensure updateNote is used
-    navigate('/');  // Navigate back to home
+    if (note) {
+      const updatedNote = { id: numericId, title, content };  // Ensure the full note is passed
+      updateNote(updatedNote); // Call to updateNote function here
+      navigate('/');  // navigate back to main page after saving
+    }
   };
+  
+  useEffect(() => {
+    console.log('Title:', title, 'Content:', content); // Log current title/content
+  }, [title, content]);
 
   return (
     <div>

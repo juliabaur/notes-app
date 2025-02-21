@@ -11,6 +11,7 @@ export const ACTIONS = {
 const NotesContext = createContext();
 
 const notesReducer = (state, action) => {
+  console.log('Action dispatched:', action); // Log the action
   switch (action.type) {
     case ACTIONS.LOAD_NOTES:
       return { ...state, notes: action.payload };
@@ -19,6 +20,7 @@ const notesReducer = (state, action) => {
     case ACTIONS.DELETE_NOTE:
       return { ...state, notes: state.notes.filter(note => note.id !== action.payload) };
     case ACTIONS.UPDATE_NOTE:
+      console.log('Updated notes:', state.notes); // Log current notes before update
       return {
         ...state,
         notes: state.notes.map(note =>
@@ -49,8 +51,10 @@ export const NotesProvider = ({ children }) => {
     if (!user) return;
     const allNotes = JSON.parse(localStorage.getItem('notes')) || {};
     allNotes[user.email] = notes;
+    console.log('Saving to localStorage:', allNotes); // Add log here
     localStorage.setItem('notes', JSON.stringify(allNotes));
   };
+  
 
   // Add new note
   const saveNote = (note) => {
@@ -81,7 +85,7 @@ export const NotesProvider = ({ children }) => {
     );
   
     saveToLocalStorage(updatedNotes); // Save the updated notes in localStorage
-    dispatch({ type: ACTIONS.UPDATE_NOTE, payload: updatedNote }); // Dispatch to update state
+    dispatch({ type: ACTIONS.UPDATE_NOTE, payload: updatedNote }); // Dispatch with the full updated note
   };
 
   return (

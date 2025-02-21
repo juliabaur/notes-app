@@ -5,26 +5,41 @@ import { useAuth } from '../context/AuthContext';
 const Notes = () => {
   const { user } = useAuth(); // Access current user
 
-  // Redirect if user is not logged in
   if (!user) {
     return <div className="text-center text-red-500 mt-10">You need to sign in to access the notes.</div>;
   }
 
   // Access notes from context
-  const { notes, saveNote, deleteNote } = useNotes();
+  const { notes, saveNote, deleteNote, updateNote } = useNotes();
   const [note, setNote] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editedContent, setEditedContent] = useState('');
 
   // Add new note
   const handleAddNote = () => {
     if (note.trim() === '') return; // Prevent empty notes
     const newNote = { id: Date.now(), content: note };
-    saveNote(newNote); // Now using the context function
+    saveNote(newNote);
     setNote('');
   };
 
-  // Delete Note
-  const handleDeleteNote = (id) => {
-    deleteNote(id); // Now using the context function
+  // Edit a note
+  const handleEdit = (note) => {
+    setEditingId(note.id);
+    setEditedContent(note.content);
+  };
+
+  // Save the edited note
+  const handleSave = (id) => {
+    if (editedContent.trim() === '') return;
+    const updatedNote = { id, content: editedContent };
+    updateNote(updatedNote);
+    setEditingId(null);
+  };
+
+  // Cancel editing
+  const handleCancel = () => {
+    setEditingId(null);
   };
 
   return (
@@ -53,13 +68,40 @@ const Notes = () => {
         ) : (
           notes.map((note) => (
             <li key={note.id} className="flex justify-between items-center border-b py-2">
-              <span>{note.content}</span>
-              <button
-                onClick={() => handleDeleteNote(note.id)}
-                className="text-red-500"
-              >
-                Delete
-              </button>
+              {editingId === note.id ? (
+                <div className="flex gap-2 w-full">
+                  <input
+                    type="text"
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                    className="border p-2 w-full rounded-md"
+                  />
+                  <button onClick={() => handleSave(note.id)} className="bg-green-500 text-white px-3 py-1 rounded-md">
+                    Save
+                  </button>
+                  <button onClick={handleCancel} className="bg-gray-400 text-white px-3 py-1 rounded-md">
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <span>{note.content}</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(note)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded-md"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteNote(note.id)}
+                      className="text-red-500 px-3 py-1 rounded-md"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
             </li>
           ))
         )}

@@ -25,12 +25,12 @@ const Header = () => {
           <>
             {/* My Notes Link */}
             <Link to="/notes" className="text-[#517B5D] hover:text-gray-400">
-              {`${user.username}'s Notes`} {/* Dynamically shows "Mike's Notes" */}
+              {user.username ? `${user.username}'s Notes` : 'Notes'} {/* Conditionally display username */}
             </Link>
 
             {/* Profile Link */}
             <Link to="/profile" className="text-[#517B5D] hover:text-gray-400">
-              {`${user.username}'s Profile`} {/* Dynamically shows "Mike's Profile" */}
+              {user.username ? `${user.username}'s Profile` : 'Profile'} {/* Conditionally display username */}
             </Link>
 
             {/* Sign Out Button */}

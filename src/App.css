@@ -1,3 +1,9 @@
+
+.main-content {
+  padding-bottom: 5rem; /* Ensure space for the footer */
+}
+
+
 #root {
   max-width: 1280px;
   margin: 0 auto;

@@ -5,6 +5,7 @@ export const ACTIONS = {
   ADD_NOTE: 'ADD_NOTE',
   DELETE_NOTE: 'DELETE_NOTE',
   LOAD_NOTES: 'LOAD_NOTES',
+  UPDATE_NOTE: 'UPDATE_NOTE',  // Added for updating a note
 };
 
 const NotesContext = createContext();
@@ -17,6 +18,13 @@ const notesReducer = (state, action) => {
       return { ...state, notes: [...state.notes, action.payload] };
     case ACTIONS.DELETE_NOTE:
       return { ...state, notes: state.notes.filter(note => note.id !== action.payload) };
+    case ACTIONS.UPDATE_NOTE:
+      return {
+        ...state,
+        notes: state.notes.map(note =>
+          note.id === action.payload.id ? { ...note, ...action.payload } : note
+        ),
+      };
     default:
       return state;
   }
@@ -67,8 +75,26 @@ export const NotesProvider = ({ children }) => {
     dispatch({ type: ACTIONS.DELETE_NOTE, payload: id });
   };
 
+  // ✅ Update an existing note
+  const updateNote = (updatedNote) => {
+    if (!user) {
+      throw new Error("No user logged in");
+    }
+
+    const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
+    const userNotes = allNotes[user.email] || [];
+
+    const updatedNotes = userNotes.map(note =>
+      note.id === updatedNote.id ? updatedNote : note
+    );
+    allNotes[user.email] = updatedNotes;
+    localStorage.setItem("notes", JSON.stringify(allNotes));
+
+    dispatch({ type: ACTIONS.UPDATE_NOTE, payload: updatedNote });
+  };
+
   return (
-    <NotesContext.Provider value={{ notes: state.notes, saveNote, deleteNote }}>
+    <NotesContext.Provider value={{ notes: state.notes, saveNote, deleteNote, updateNote }}>
       {children}
     </NotesContext.Provider>
   );

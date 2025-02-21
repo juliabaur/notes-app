@@ -8,7 +8,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const navigate = useNavigate(); // This could throw if called outside Router
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!navigate) {
@@ -25,16 +25,24 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(loadUserData());
 
   const login = (email, password) => {
-    const newUser = { email, password };
-    setUser(newUser);
-    localStorage.setItem('user', JSON.stringify(newUser));
-    navigate('/profile');
+    // Simulate user authentication (you can add backend logic here)
+    const storedUser = JSON.parse(localStorage.getItem('users'))?.find(
+      (user) => user.email === email && user.password === password
+    );
+
+    if (storedUser) {
+      setUser(storedUser);
+      localStorage.setItem('user', JSON.stringify(storedUser));
+      navigate('/notes'); // Redirect after successful login
+    } else {
+      throw new Error("Invalid email or password");
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    navigate('/signin');
+    navigate('/signin'); // Redirect after logout
   };
 
   const updateEmail = (newEmail) => {
@@ -56,28 +64,28 @@ export const AuthProvider = ({ children }) => {
   const deleteAccount = () => {
     setUser(null);
     localStorage.removeItem('user');
-    navigate('/signin');
+    navigate('/signin'); // Redirect after account deletion
   };
 
-  // ✅ Register function inside AuthProvider
-  const register = (email, password) => {
+  // Register function
+  const register = (email, password, username) => {
     console.log("Registering user:", email);
 
     // Get the existing users from localStorage
-    const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
+    const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
 
     // Check if the email is already registered
-    const userExists = existingUsers.some(user => user.email === email);
+    const userExists = existingUsers.some((user) => user.email === email);
     if (userExists) {
       throw new Error("User already exists!");
     }
 
     // Create a new user object
-    const newUser = { email, password };
+    const newUser = { email, password, username };
 
-    // Store new user in the users array
+    // Store the new user
     const updatedUsers = [...existingUsers, newUser];
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
 
     console.log("User registered successfully:", newUser);
   };

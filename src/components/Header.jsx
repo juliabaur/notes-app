@@ -9,7 +9,9 @@ const Header = () => {
     <div className="navbar bg-grey bg-opacity-20">
       {/* Logo or App Title */}
       <div className="navbar-start">
-        <h1 className="text-xl font-bold ml-6">My Notes App</h1>
+        <h1 className="text-xl font-bold ml-6">
+          {user ? 'The Notes App' : 'My Notes App'} {/* Display 'The Notes App' when user is logged in */}
+        </h1>
       </div>
 
       {/* Navigation and Sign In/Sign Out */}
@@ -23,7 +25,12 @@ const Header = () => {
           <>
             {/* My Notes Link */}
             <Link to="/notes" className="text-[#517B5D] hover:text-gray-400">
-              My Notes
+              {`${user.username}'s Notes`} {/* Dynamically shows "Mike's Notes" */}
+            </Link>
+
+            {/* Profile Link */}
+            <Link to="/profile" className="text-[#517B5D] hover:text-gray-400">
+              {`${user.username}'s Profile`} {/* Dynamically shows "Mike's Profile" */}
             </Link>
 
             {/* Sign Out Button */}

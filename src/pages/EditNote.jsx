@@ -1,31 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useNotes } from '../context/NotesContext';  
+import { useNotes } from '../context/NotesContext';
 
 const EditNote = () => {
-  const { id } = useParams();  // Fetch ID from URL
-  const { state, dispatch } = useNotes();
-  const note = state.notes.find((note) => note.id === id);  // Find to be modified note
-
-  const [title, setTitle] = useState(note ? note.title : '');  // Default: Note title
-  const [content, setContent] = useState(note ? note.content : '');  
-
+  const { id } = useParams();
+  const { notes, updateNote } = useNotes();
   const navigate = useNavigate();
 
-  // Function for saving modified note
-  const handleSave = () => {
-    dispatch({
-      type: 'update_note',
-      payload: { id, title, content },
-    });
-    navigate('/');  // navigate back to main page after saving
-  };
+  // Convert id to number if needed
+  const numericId = parseInt(id, 10);
+
+  // Find the note
+  const note = notes.find((note) => note.id === numericId);
+
+  // Fix issue where note is initially undefined
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
 
   useEffect(() => {
-    if (!note) {
-      navigate('/');  // If no note exists, back to home page
+    if (note) {
+      setTitle(note.title);
+      setContent(note.content);
+    } else {
+      navigate('/');  // Redirect if note not found
     }
   }, [note, navigate]);
+
+  const handleSave = () => {
+    if (!note) return;
+
+    updateNote({ ...note, title, content });  // Ensure updateNote is used
+    navigate('/');  // Navigate back to home
+  };
 
   return (
     <div>
@@ -52,4 +58,4 @@ const EditNote = () => {
   );
 };
 
-export default EditNote;  
+export default EditNote;

@@ -5,7 +5,7 @@ export const ACTIONS = {
   ADD_NOTE: 'ADD_NOTE',
   DELETE_NOTE: 'DELETE_NOTE',
   LOAD_NOTES: 'LOAD_NOTES',
-  UPDATE_NOTE: 'UPDATE_NOTE',  // Added for updating a note
+  UPDATE_NOTE: 'UPDATE_NOTE',
 };
 
 const NotesContext = createContext();
@@ -34,63 +34,54 @@ export const NotesProvider = ({ children }) => {
   const { user } = useAuth(); // Get the currently logged-in user
   const [state, dispatch] = useReducer(notesReducer, { notes: [] });
 
-  // ✅ Load notes when user changes
+  // Load notes when user logs in or changes
   useEffect(() => {
     if (user) {
-      const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
-      const userNotes = allNotes[user.email] || [];
-      dispatch({ type: ACTIONS.LOAD_NOTES, payload: userNotes });
+      const storedNotes = JSON.parse(localStorage.getItem('notes')) || {};
+      dispatch({ type: ACTIONS.LOAD_NOTES, payload: storedNotes[user.email] || [] });
     } else {
       dispatch({ type: ACTIONS.LOAD_NOTES, payload: [] });
     }
   }, [user]);
 
-  // ✅ Save note under the logged-in user
-  const saveNote = (note) => {
-    if (!user) {
-      throw new Error("No user logged in");
-    }
-
-    const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
-    const userNotes = allNotes[user.email] || [];
-
-    const updatedNotes = [...userNotes, note];
-    allNotes[user.email] = updatedNotes;
-    localStorage.setItem("notes", JSON.stringify(allNotes));
-
-    dispatch({ type: ACTIONS.ADD_NOTE, payload: note });
+  // Save notes to localStorage
+  const saveToLocalStorage = (notes) => {
+    if (!user) return;
+    const allNotes = JSON.parse(localStorage.getItem('notes')) || {};
+    allNotes[user.email] = notes;
+    localStorage.setItem('notes', JSON.stringify(allNotes));
   };
 
-  // ✅ Delete a specific note
+  // Add new note
+  const saveNote = (note) => {
+    if (!user) throw new Error('No user logged in');
+
+    const newNote = { id: Date.now(), ...note }; // Ensure a unique ID
+    const updatedNotes = [...state.notes, newNote];
+
+    saveToLocalStorage(updatedNotes); // Save the updated notes in localStorage
+    dispatch({ type: ACTIONS.ADD_NOTE, payload: newNote }); // Dispatch to update state
+  };
+
+  // Delete a specific note
   const deleteNote = (id) => {
     if (!user) return;
 
-    const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
-    const userNotes = allNotes[user.email] || [];
-
-    const updatedNotes = userNotes.filter(note => note.id !== id);
-    allNotes[user.email] = updatedNotes;
-    localStorage.setItem("notes", JSON.stringify(allNotes));
-
-    dispatch({ type: ACTIONS.DELETE_NOTE, payload: id });
+    const updatedNotes = state.notes.filter(note => note.id !== id);
+    saveToLocalStorage(updatedNotes); // Save the updated notes in localStorage
+    dispatch({ type: ACTIONS.DELETE_NOTE, payload: id }); // Dispatch to update state
   };
 
-  // ✅ Update an existing note
+  // Update an existing note
   const updateNote = (updatedNote) => {
-    if (!user) {
-      throw new Error("No user logged in");
-    }
-
-    const allNotes = JSON.parse(localStorage.getItem("notes")) || {};
-    const userNotes = allNotes[user.email] || [];
-
-    const updatedNotes = userNotes.map(note =>
-      note.id === updatedNote.id ? updatedNote : note
+    if (!user) throw new Error('No user logged in');
+  
+    const updatedNotes = state.notes.map(note =>
+      note.id === updatedNote.id ? { ...note, ...updatedNote } : note
     );
-    allNotes[user.email] = updatedNotes;
-    localStorage.setItem("notes", JSON.stringify(allNotes));
-
-    dispatch({ type: ACTIONS.UPDATE_NOTE, payload: updatedNote });
+  
+    saveToLocalStorage(updatedNotes); // Save the updated notes in localStorage
+    dispatch({ type: ACTIONS.UPDATE_NOTE, payload: updatedNote }); // Dispatch to update state
   };
 
   return (
